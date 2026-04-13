@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 import databases
-from core.settings import get_settings
+from app.core.settings import get_settings
 
 database = databases.Database(get_settings().DATABASE_URL)
 metadata = sa.MetaData()

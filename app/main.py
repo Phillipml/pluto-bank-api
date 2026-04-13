@@ -3,14 +3,14 @@ from http import HTTPStatus
 from fastapi import FastAPI
 
 from app.controllers import health
-from app.db import database
+from app.db.database import database, metadata, engine
 from app.schemas.users import UserCreate, UserResponse
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await database.connect()
-    database.metadata.create_all(database.engine)
+    metadata.create_all(engine)
     yield
     await database.disconnect()
 
