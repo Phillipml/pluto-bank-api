@@ -1,2 +1,5 @@
+POETRY = poetry run
 server:
-	poetry run uvicorn app.main:app --reload
+	${POETRY} uvicorn app.main:app --reload
+format:
+	${POETRY} ruff format .
