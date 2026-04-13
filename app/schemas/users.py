@@ -11,4 +11,4 @@ class UserResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
-    amount: float = Field(gt=0)
+    amount: float = Field(gt=-1)

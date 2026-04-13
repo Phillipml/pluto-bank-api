@@ -1,14 +1,26 @@
+from contextlib import asynccontextmanager
 from http import HTTPStatus
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.controllers import health
+from app.db.database import database, metadata, engine
+from app.schemas.users import UserCreate, UserResponse
 
 
-@app.get("/")
-def hello():
-    return {"hello": "world"}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await database.connect()
+    metadata.create_all(engine)
+    yield
+    await database.disconnect()
 
 
-@app.post("/users/", status_code=HTTPStatus.CREATED)
-def create_user():
-    pass
+app = FastAPI(lifespan=lifespan)
+
+
+@app.post("/users/", status_code=HTTPStatus.CREATED, response_model=UserResponse)
+def create_user(user: UserCreate):
+    return user
+
+
+app.include_router(health.router)
