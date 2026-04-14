@@ -45,6 +45,39 @@ make get_secret_key
 poetry install
 ```
 
+## Migrações (Alembic)
+
+Gerar e aplicar migration:
+
+```bash
+make migrations
+```
+
+Gerar/aplicar e já subir servidor:
+
+```bash
+make migrate-and-run
+```
+
+Comandos equivalentes:
+
+```bash
+poetry run alembic revision --autogenerate -m "mensagem_da_migration"
+poetry run alembic upgrade head
+```
+
+Conferir versão atual aplicada no banco:
+
+```bash
+poetry run alembic current
+```
+
+### Dicas de troubleshooting
+
+- Erro `Target database is not up to date`: aplique primeiro as migrations pendentes com `poetry run alembic upgrade head`.
+- Antes de gerar autogenerate, confirme que os models estão importados no `alembic/env.py` para o Alembic enxergar todo `metadata`.
+- Em SQLite local, se o schema antigo estiver inconsistente e sem dados relevantes, pode ser mais rápido remover `bank.db` e recriar o banco.
+
 ## Execução
 
 Inicie o servidor em modo de desenvolvimento:
@@ -114,6 +147,12 @@ Formatar código:
 
 ```bash
 make format
+```
+
+Executar apenas migrations:
+
+```bash
+make migrations
 ```
 
 ## Estrutura do projeto
