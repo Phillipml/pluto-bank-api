@@ -1,8 +1,8 @@
 import sqlalchemy as sa
 from app.db.database import metadata
 
-user = sa.Table(
-    "user",
+users = sa.Table(
+    "users",
     metadata,
     sa.Column("id", sa.Integer, primary_key=True),
     sa.Column("name", sa.String(120), nullable=False),
