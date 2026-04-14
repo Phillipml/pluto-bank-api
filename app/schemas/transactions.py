@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from app.schemas.users import UserResponse
 
 
-class TransactionCreate(BaseModel):
+class TransactionRequest(BaseModel):
     value: Decimal = Field(gt=-1, max_digits=12, decimal_places=2)
     description: str = Field(min_length=3, max_length=255)
 
