@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from pydantic import BaseModel, Field
 
@@ -12,3 +13,4 @@ class TransactionsResponse(BaseModel):
     user_id: int
     value: Decimal = Field(max_digits=12, decimal_places=2)
     description: str
+    created_at: datetime

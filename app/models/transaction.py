@@ -10,4 +10,10 @@ transactions = sa.Table(
     ),
     sa.Column("value", sa.Numeric(12, 2), nullable=False),
     sa.Column("description", sa.String(255), nullable=False, server_default=""),
+    sa.Column(
+        "created_at",
+        sa.DateTime(timezone=True),
+        nullable=False,
+        server_default=sa.func.now(),
+    ),
 )

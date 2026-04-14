@@ -51,6 +51,7 @@ async def create_transaction(
                 transactions.c.user_id,
                 transactions.c.value,
                 transactions.c.description,
+                transactions.c.created_at,
             )
         )
         tx_row = await database.fetch_one(ins)
@@ -64,6 +65,7 @@ async def create_transaction(
             user_id=tx["user_id"],
             value=tx["value"],
             description=tx["description"],
+            created_at=tx["created_at"],
         ),
         "user": UserResponse(
             id=u["id"],
