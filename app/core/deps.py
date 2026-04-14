@@ -1,16 +1,17 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jwt import InvalidTokenError
-from sqlalchemy import select
 
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+from sqlalchemy import select
+
 from app.core.settings import get_settings
 from app.db.database import database
-from app.schemas import users
+from app.models.user import users
 from app.schemas.users import UserResponse
 
-oauth2_scheme = OAuth2PasswordBearer("/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
