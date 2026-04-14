@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./bank.db"
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
-    ACESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
 
 @lru_cache

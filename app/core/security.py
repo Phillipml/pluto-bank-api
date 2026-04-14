@@ -8,7 +8,7 @@ pwd_context = PasswordHash.recommended()
 DUMMY_PASSWORD_HASH = pwd_context.hash("password-not-used-for-real-users")
 
 
-def create_acess_token(*, subject: str, expires_delta: timedelta | None = None) -> str:
+def create_access_token(*, subject: str, expires_delta: timedelta | None = None) -> str:
     settings = get_settings()
     if expires_delta is None:
         expires_delta = timedelta(minutes=settings.ACESS_TOKEN_EXPIRE_MINUTES)
