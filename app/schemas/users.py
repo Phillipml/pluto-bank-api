@@ -5,6 +5,7 @@ class UserCreate(BaseModel):
     name: str = Field(min_length=3, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8)
+    disabled: bool | None = None
 
 
 class UserResponse(BaseModel):
