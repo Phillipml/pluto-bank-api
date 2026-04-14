@@ -74,3 +74,32 @@ async def create_transaction(
             amount=float(u["amount"]),
         ),
     }
+
+
+@router.get("/me", response_model=list[TransactionsResponse])
+async def list_my_transactions(
+    current_user: Annotated[UserResponse, Depends(get_current_user)],
+) -> list[TransactionsResponse]:
+    query = (
+        select(
+            transactions.c.id,
+            transactions.c.user_id,
+            transactions.c.value,
+            transactions.c.description,
+            transactions.c.created_at,
+        )
+        .where(transactions.c.user_id == current_user.id)
+        .order_by(transactions.c.created_at.desc())
+    )
+    rows = await database.fetch_all(query)
+
+    return [
+        TransactionsResponse(
+            id=row["id"],
+            user_id=row["user_id"],
+            value=row["value"],
+            description=row["description"],
+            created_at=row["created_at"],
+        )
+        for row in rows
+    ]
