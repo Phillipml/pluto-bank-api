@@ -8,7 +8,7 @@ from app.core.deps import get_current_user
 from app.db.database import database
 from app.models.transaction import transactions
 from app.models.user import users
-from app.schemas.transactions import TransactionRequest, TransactionResponse
+from app.schemas.transactions import TransactionRequest, TransactionsResponse
 from app.schemas.users import UserResponse
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -59,7 +59,7 @@ async def create_transaction(
     u = dict(user_row._mapping)
 
     return {
-        "transaction": TransactionResponse(
+        "transaction": TransactionsResponse(
             id=tx["id"],
             user_id=tx["user_id"],
             value=tx["value"],

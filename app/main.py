@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.controllers import health, user
+from app.controllers import health, transactions, user
 from app.db.database import database, metadata, engine
 
 
@@ -17,3 +17,4 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(health.router)
 app.include_router(user.router)
+app.include_router(transactions.router)

@@ -8,6 +8,6 @@ transactions = sa.Table(
     sa.Column(
         "user_id", sa.Integer, sa.ForeignKey("users.id"), nullable=False, index=True
     ),
-    sa.Column("value", sa.Integer, nullable=False),
+    sa.Column("value", sa.Numeric(12, 2), nullable=False),
     sa.Column("description", sa.String(255), nullable=False, server_default=""),
 )
