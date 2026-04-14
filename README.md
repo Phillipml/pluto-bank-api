@@ -1,30 +1,39 @@
 # Pluto Bank API
 
-API REST em **FastAPI** para operações bancárias de usuários: cadastro, listagem, autenticação com JWT e perfil autenticado. Persistência em **SQLite** via **SQLAlchemy** + **databases** (acesso assíncrono). Senhas com **Argon2** (`pwdlib`).
+API REST construída com **FastAPI** para operações bancárias básicas:
+- cadastro e listagem de usuários;
+- autenticação com JWT;
+- consulta de perfil autenticado;
+- registro de transações de crédito e débito com atualização de saldo.
+
+A persistência é feita em **SQLite** com **SQLAlchemy** + **databases** (acesso assíncrono), e senhas são armazenadas com hash **Argon2** via `pwdlib`.
 
 ## Requisitos
 
 - Python **3.13+**
-- [Poetry](https://python-poetry.org/) (gerenciamento de dependências e ambiente virtual)
+- [Poetry](https://python-poetry.org/)
 
 ## Configuração
 
-Crie um arquivo `.env` na raiz do repositório. O `JWT_SECRET_KEY` é **obrigatório** (não há valor padrão em produção).
+Crie um arquivo `.env` na raiz. A variável `JWT_SECRET_KEY` é obrigatória.
 
 | Variável | Obrigatória | Padrão | Descrição |
 |----------|-------------|--------|-----------|
-| `JWT_SECRET_KEY` | Sim | — | Chave secreta para assinar tokens JWT |
-| `JWT_ALGORITHM` | Não | `HS256` | Algoritmo do JWT |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Não | `60` | Validade do access token em minutos |
-| `DATABASE_URL` | Não | `sqlite:///./bank.db` | URL do banco (SQLite por padrão) |
+| `JWT_SECRET_KEY` | Sim | - | Chave secreta usada para assinar o JWT |
+| `JWT_ALGORITHM` | Não | `HS256` | Algoritmo de assinatura do JWT |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Não | `60` | Tempo de expiração do access token (minutos) |
+| `DATABASE_URL` | Não | `sqlite:///./bank.db` | URL de conexão com o banco |
 
-Exemplo mínimo de `.env`:
+Exemplo de `.env`:
 
 ```env
 JWT_SECRET_KEY=sua_chave_secreta_longa_e_aleatoria
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+DATABASE_URL=sqlite:///./bank.db
 ```
 
-Para gerar uma chave aleatória (hex 32 bytes), na raiz do projeto:
+Gerar chave aleatória:
 
 ```bash
 make get_secret_key
@@ -36,40 +45,72 @@ make get_secret_key
 poetry install
 ```
 
-## Executando
+## Execução
 
-Servidor de desenvolvimento com reload:
+Inicie o servidor em modo de desenvolvimento:
 
 ```bash
 make server
 ```
 
-Equivalente:
+Comando equivalente:
 
 ```bash
 poetry run uvicorn app.main:app --reload
 ```
 
-Documentação interativa: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (Swagger UI).
+Aplicação:
+- API: `http://127.0.0.1:8000`
+- Swagger: `http://127.0.0.1:8000/docs`
 
-## Endpoints principais
+## Endpoints
 
-| Método | Caminho | Autenticação | Descrição |
-|--------|---------|--------------|-----------|
-| `GET` | `/health/` | Não | Status do servidor |
+| Método | Rota | Autenticação | Descrição |
+|--------|------|--------------|-----------|
+| `GET` | `/health/` | Não | Health check da API |
 | `GET` | `/users/` | Não | Lista usuários |
-| `POST` | `/users/create` | Não | Cria usuário (corpo JSON) |
-| `POST` | `/users/login` | Não | Login (form OAuth2: `username` = e-mail, `password`) |
-| `GET` | `/users/me` | Bearer JWT | Dados do usuário logado |
+| `POST` | `/users/create` | Não | Cria novo usuário |
+| `POST` | `/users/login` | Não | Login e geração de access token |
+| `GET` | `/users/me` | Bearer JWT | Retorna usuário autenticado |
+| `POST` | `/transactions/` | Bearer JWT | Registra crédito/débito e atualiza saldo |
 
-- **Login**: envie `application/x-www-form-urlencoded` com `username` (e-mail) e `password`, conforme `OAuth2PasswordRequestForm`.
-- **Rotas protegidas**: header `Authorization: Bearer <access_token>`.
+### Regras relevantes
 
-Na criação de usuário, o corpo segue o schema `UserCreate` (nome, e-mail, senha com regras de validação definidas em `app/schemas/users.py`).
+- O login usa `application/x-www-form-urlencoded` (`username` = e-mail).
+- Rotas protegidas exigem `Authorization: Bearer <token>`.
+- Na transação, valores positivos representam crédito e negativos representam débito.
+- Débitos que deixariam o saldo negativo são rejeitados com `400 Bad Request` e mensagem `Saldo insuficiente`.
+
+## Exemplos rápidos
+
+### 1) Criar usuário
+
+```bash
+curl -X POST "http://127.0.0.1:8000/users/create" \
+  -H "Content-Type: application/json" \
+  -d "{\"name\":\"Maria Silva\",\"email\":\"maria@email.com\",\"password\":\"12345678\"}"
+```
+
+### 2) Login (obter token)
+
+```bash
+curl -X POST "http://127.0.0.1:8000/users/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=maria@email.com&password=12345678"
+```
+
+### 3) Criar transação autenticada
+
+```bash
+curl -X POST "http://127.0.0.1:8000/transactions/" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -H "Content-Type: application/json" \
+  -d "{\"value\":-50.00,\"description\":\"Compra no mercado\"}"
+```
 
 ## Desenvolvimento
 
-Formatação com Ruff:
+Formatar código:
 
 ```bash
 make format
@@ -77,16 +118,16 @@ make format
 
 ## Estrutura do projeto
 
-```
+```text
 app/
-  main.py              # App FastAPI, lifespan (conexão DB, criação de tabelas)
-  controllers/         # Rotas (health, users)
-  core/                # Configurações, segurança, dependências (JWT)
-  db/                  # Database engine e metadata
-  models/              # Tabelas SQLAlchemy
-  schemas/             # Modelos Pydantic (entrada/saída)
+  main.py              # Inicialização FastAPI e ciclo de vida da conexão
+  controllers/         # Rotas HTTP (health, users, transactions)
+  core/                # Segurança, settings e dependências
+  db/                  # Configuração de engine, database e metadata
+  models/              # Definições de tabelas SQLAlchemy
+  schemas/             # Schemas Pydantic de request/response
 ```
 
 ## Licença
 
-Veja o arquivo `LICENSE` na raiz do repositório.
+Consulte o arquivo `LICENSE` na raiz do projeto.
