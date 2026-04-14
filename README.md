@@ -106,12 +106,14 @@ Aplicação:
 | `POST` | `/users/login` | Não | Login e geração de access token |
 | `GET` | `/users/me` | Bearer JWT | Retorna usuário autenticado |
 | `POST` | `/transactions/` | Bearer JWT | Registra crédito/débito e atualiza saldo |
+| `GET` | `/transactions/me` | Bearer JWT | Lista transações do usuário autenticado |
 
 ### Regras relevantes
 
 - O login usa `application/x-www-form-urlencoded` (`username` = e-mail).
 - Rotas protegidas exigem `Authorization: Bearer <token>`.
 - Na transação, valores positivos representam crédito e negativos representam débito.
+- O campo `value` aceita casas decimais (ex.: `-10.89`) e usa ponto como separador decimal no JSON.
 - Débitos que deixariam o saldo negativo são rejeitados com `400 Bad Request` e mensagem `Saldo insuficiente`.
 
 ## Exemplos rápidos
@@ -139,6 +141,13 @@ curl -X POST "http://127.0.0.1:8000/transactions/" \
   -H "Authorization: Bearer SEU_TOKEN_AQUI" \
   -H "Content-Type: application/json" \
   -d "{\"value\":-50.00,\"description\":\"Compra no mercado\"}"
+```
+
+### 4) Listar transações do usuário logado
+
+```bash
+curl -X GET "http://127.0.0.1:8000/transactions/me" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
 ```
 
 ## Desenvolvimento
