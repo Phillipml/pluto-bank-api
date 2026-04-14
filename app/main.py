@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from http import HTTPStatus
 from fastapi import FastAPI
 
 from app.controllers import health, user
